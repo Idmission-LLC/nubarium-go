@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	nubarium "github.com/idmission/nubarium-go"
+	nubarium "github.com/Idmission-LLC/nubarium-go"
 	"github.com/spf13/viper"
 )
 

@@ -1,4 +1,4 @@
-module github.com/idmission/nubarium-go
+module github.com/Idmission-LLC/nubarium-go
 
 go 1.24
 

@@ -15,7 +15,7 @@ A Go module that replicates the functionality of the Java Nubarium adapter for c
 ## Installation
 
 ```bash
-go get github.com/idmission/nubarium-go
+go get github.com/Idmission-LLC/nubarium-go
 ```
 
 ## Configuration
@@ -43,7 +43,7 @@ import (
     "fmt"
     "log"
 
-    nubarium "github.com/idmission/nubarium-go"
+    nubarium "github.com/Idmission-LLC/nubarium-go"
     "github.com/spf13/viper"
 )
 
@@ -117,7 +117,7 @@ You can customize the retry behavior by injecting your own retryable HTTP client
 import (
     "time"
     retryablehttp "github.com/hashicorp/go-retryablehttp"
-    nubarium "github.com/idmission/nubarium-go"
+    nubarium "github.com/Idmission-LLC/nubarium-go"
 )
 
 // Create custom retryable client
