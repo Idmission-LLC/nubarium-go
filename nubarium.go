@@ -70,10 +70,13 @@ type Response struct {
 	Headers    http.Header
 }
 
-// SendRequest sends a JSON request to Nubarium API with automatic retries
-func (c *Client) SendRequest(jsonRequest string) (*Response, error) {
+// SendRequest sends a JSON request to a specific Nubarium API endpoint with automatic retries
+func (c *Client) SendRequest(endpoint string, jsonRequest string) (*Response, error) {
+	// Construct full URL
+	fullURL := c.BaseURL + endpoint
+
 	// Step 1: Prepare retryable HTTP request
-	req, err := retryablehttp.NewRequest(http.MethodPost, c.BaseURL, bytes.NewBufferString(jsonRequest))
+	req, err := retryablehttp.NewRequest(http.MethodPost, fullURL, bytes.NewBufferString(jsonRequest))
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP request: %w", err)
 	}
@@ -122,15 +125,33 @@ func (c *Client) SendRequest(jsonRequest string) (*Response, error) {
 }
 
 // SendRequestWithPayload sends a request with a struct payload that will be marshaled to JSON
-func (c *Client) SendRequestWithPayload(payload interface{}) (*Response, error) {
+func (c *Client) SendRequestWithPayload(endpoint string, payload interface{}) (*Response, error) {
 	jsonBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling payload to JSON: %w", err)
 	}
-	return c.SendRequest(string(jsonBytes))
+	return c.SendRequest(endpoint, string(jsonBytes))
 }
 
 // ParseResponse unmarshals the JSON response into the provided struct
 func (r *Response) ParseResponse(v interface{}) error {
 	return json.Unmarshal([]byte(r.JSONData), v)
+}
+
+// Endpoint constants for Nubarium OCR API
+const (
+	EndpointComprobanteDomicilio = "/ocr/v2/comprobante_domicilio"
+)
+
+// ComprobanteDomicilioRequest represents the request payload for the comprobante_domicilio endpoint
+type ComprobanteDomicilioRequest struct {
+	Comprobante string `json:"comprobante"` // Base64 encoded image
+}
+
+// SendComprobanteDomicilio is a convenience method for sending a comprobante_domicilio request
+func (c *Client) SendComprobanteDomicilio(base64Image string) (*Response, error) {
+	payload := ComprobanteDomicilioRequest{
+		Comprobante: base64Image,
+	}
+	return c.SendRequestWithPayload(EndpointComprobanteDomicilio, payload)
 }

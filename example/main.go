@@ -67,17 +67,8 @@ func main() {
 		nubarium.WithCredentials(username, password),
 	)
 
-	// Create request payload with base64 encoded image
-	type RequestPayload struct {
-		Comprobante string `json:"comprobante"`
-	}
-
-	payload := RequestPayload{
-		Comprobante: base64Image,
-	}
-
-	// Send request
-	response, err := client.SendRequestWithPayload(payload)
+	// Send request using the convenience method
+	response, err := client.SendComprobanteDomicilio(base64Image)
 	if err != nil {
 		log.Fatalf("Error sending request: %v", err)
 	}

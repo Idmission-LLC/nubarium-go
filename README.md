@@ -25,10 +25,12 @@ The module uses Viper to load configuration from a `.env` file or environment va
 Create a `.env` file in the project root:
 
 ```bash
-NUBARIUM_ENDPOINT=https://ocr.nubarium.com/ocr/v2/comprobante_domicilio
+NUBARIUM_ENDPOINT=https://ocr.nubarium.com
 NUBARIUM_USERNAME=your-username
 NUBARIUM_PASSWORD=your-password
 ```
+
+Note: The `NUBARIUM_ENDPOINT` should be set to the base URL only. Specific endpoints are handled by the client methods.
 
 ## Usage
 
@@ -58,42 +60,49 @@ func init() {
 
 func main() {
     // Load configuration
-    endpoint := viper.GetString("NUBARIUM_ENDPOINT")
+    baseURL := viper.GetString("NUBARIUM_ENDPOINT")
     username := viper.GetString("NUBARIUM_USERNAME")
     password := viper.GetString("NUBARIUM_PASSWORD")
 
     // Create a new client using option pattern
     client := nubarium.NewClient(
-        nubarium.WithBaseURL(endpoint),
+        nubarium.WithBaseURL(baseURL),
         nubarium.WithCredentials(username, password),
     )
 
-    // Option 1: Send raw JSON string
-    jsonRequest := `{"field1": "value1", "field2": "value2"}`
-    response, err := client.SendRequest(jsonRequest)
+    // Option 1: Use endpoint-specific convenience method
+    base64Image := "your-base64-encoded-image-here"
+    response, err := client.SendComprobanteDomicilio(base64Image)
     if err != nil {
         log.Fatalf("Error: %v", err)
     }
     fmt.Printf("Status: %d\n", response.StatusCode)
     fmt.Println("Response:", response.JSONData)
 
-    // Option 2: Send Go struct (automatically marshaled to JSON)
+    // Option 2: Use generic method with endpoint constant
     type Payload struct {
         Field1 string `json:"field1"`
         Field2 string `json:"field2"`
     }
     payload := Payload{Field1: "value1", Field2: "value2"}
-    response2, err := client.SendRequestWithPayload(payload)
+    response2, err := client.SendRequestWithPayload("/ocr/v2/some_endpoint", payload)
     if err != nil {
         log.Fatalf("Error: %v", err)
     }
 
-    // Option 3: Parse response into struct
+    // Option 3: Send raw JSON string to a specific endpoint
+    jsonRequest := `{"field1": "value1", "field2": "value2"}`
+    response3, err := client.SendRequest("/ocr/v2/some_endpoint", jsonRequest)
+    if err != nil {
+        log.Fatalf("Error: %v", err)
+    }
+
+    // Option 4: Parse response into struct
     type ResponseData struct {
         Status string `json:"status"`
     }
     var data ResponseData
-    if err := response2.ParseResponse(&data); err != nil {
+    if err := response3.ParseResponse(&data); err != nil {
         log.Printf("Error parsing: %v", err)
     }
     fmt.Printf("Status: %s\n", data.Status)
@@ -120,7 +129,7 @@ retryClient.Logger = someLogger               // Custom logger
 
 // Inject the custom client
 client := nubarium.NewClient(
-    nubarium.WithBaseURL("https://api.nubarium.com/endpoint"),
+    nubarium.WithBaseURL("https://ocr.nubarium.com"),
     nubarium.WithCredentials("username", "password"),
     nubarium.WithRetryableClient(retryClient),
 )
@@ -131,12 +140,14 @@ client := nubarium.NewClient(
 The Go module sends JSON directly to Nubarium API:
 
 1. **Request Preparation**
+
    - Accepts raw JSON string or Go struct
    - Marshals struct to JSON if needed
    - Adds `Content-Type: application/json` header
    - Adds Basic Authentication header if credentials provided
 
 2. **Request Execution**
+
    - Sends POST request to Nubarium API
    - Uses HTTP client with configurable timeout
 
@@ -181,18 +192,26 @@ func WithRetryableClient(client *retryablehttp.Client) ClientOption
 ### SendRequest
 
 ```go
-func (c *Client) SendRequest(jsonRequest string) (*Response, error)
+func (c *Client) SendRequest(endpoint string, jsonRequest string) (*Response, error)
 ```
 
-Sends a JSON string request to Nubarium API and returns the response.
+Sends a JSON string request to a specific Nubarium API endpoint and returns the response.
 
 ### SendRequestWithPayload
 
 ```go
-func (c *Client) SendRequestWithPayload(payload interface{}) (*Response, error)
+func (c *Client) SendRequestWithPayload(endpoint string, payload interface{}) (*Response, error)
 ```
 
-Marshals a Go struct to JSON and sends it to Nubarium API.
+Marshals a Go struct to JSON and sends it to a specific Nubarium API endpoint.
+
+### SendComprobanteDomicilio
+
+```go
+func (c *Client) SendComprobanteDomicilio(base64Image string) (*Response, error)
+```
+
+Convenience method for sending a comprobante_domicilio OCR request. Takes a base64-encoded image string.
 
 ### Response
 
@@ -212,6 +231,76 @@ func (r *Response) ParseResponse(v interface{}) error
 ```
 
 Unmarshals the JSON response into the provided Go struct.
+
+## Available Endpoints
+
+The package currently supports the following endpoints:
+
+### Comprobante Domicilio OCR
+
+**Endpoint constant:** `nubarium.EndpointComprobanteDomicilio`
+
+**Convenience method:** `client.SendComprobanteDomicilio(base64Image string)`
+
+**Example:**
+
+```go
+client := nubarium.NewClient(
+    nubarium.WithBaseURL("https://ocr.nubarium.com"),
+    nubarium.WithCredentials("username", "password"),
+)
+
+base64Image := "your-base64-encoded-image"
+response, err := client.SendComprobanteDomicilio(base64Image)
+if err != nil {
+    log.Fatalf("Error: %v", err)
+}
+```
+
+## Adding New Endpoints
+
+To add support for a new Nubarium endpoint:
+
+1. **Add an endpoint constant** in `nubarium.go`:
+
+```go
+const (
+    EndpointComprobanteDomicilio = "/ocr/v2/comprobante_domicilio"
+    EndpointNewEndpoint          = "/ocr/v2/new_endpoint" // Add here
+)
+```
+
+2. **(Optional) Define a request struct** if the endpoint has specific payload requirements:
+
+```go
+type NewEndpointRequest struct {
+    Field1 string `json:"field1"`
+    Field2 string `json:"field2"`
+}
+```
+
+3. **(Optional) Create a convenience method**:
+
+```go
+func (c *Client) SendNewEndpoint(field1, field2 string) (*Response, error) {
+    payload := NewEndpointRequest{
+        Field1: field1,
+        Field2: field2,
+    }
+    return c.SendRequestWithPayload(EndpointNewEndpoint, payload)
+}
+```
+
+4. **Use the new endpoint**:
+
+```go
+// Using convenience method (if created)
+response, err := client.SendNewEndpoint("value1", "value2")
+
+// Or using generic method
+payload := NewEndpointRequest{Field1: "value1", Field2: "value2"}
+response, err := client.SendRequestWithPayload(EndpointNewEndpoint, payload)
+```
 
 ## Dependencies
 
