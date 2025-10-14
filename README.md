@@ -208,10 +208,10 @@ Marshals a Go struct to JSON and sends it to a specific Nubarium API endpoint.
 ### SendComprobanteDomicilio
 
 ```go
-func (c *Client) SendComprobanteDomicilio(base64Image string) (*Response, error)
+func (c *Client) SendComprobanteDomicilio(base64Image string) (*ComprobanteDomicilioResponse, error)
 ```
 
-Convenience method for sending a comprobante_domicilio OCR request. Takes a base64-encoded image string.
+Convenience method for sending a comprobante_domicilio OCR request. Takes a base64-encoded image string and returns the parsed response automatically.
 
 ### Response
 
@@ -240,7 +240,9 @@ The package currently supports the following endpoints:
 
 **Endpoint constant:** `nubarium.EndpointComprobanteDomicilio`
 
-**Convenience method:** `client.SendComprobanteDomicilio(base64Image string)`
+**Convenience method:** `client.SendComprobanteDomicilio(base64Image string) (*ComprobanteDomicilioResponse, error)`
+
+**Response struct:** `ComprobanteDomicilioResponse`
 
 **Example:**
 
@@ -251,11 +253,28 @@ client := nubarium.NewClient(
 )
 
 base64Image := "your-base64-encoded-image"
-response, err := client.SendComprobanteDomicilio(base64Image)
+result, err := client.SendComprobanteDomicilio(base64Image)
 if err != nil {
     log.Fatalf("Error: %v", err)
 }
+
+// Response is automatically parsed into typed struct
+fmt.Printf("Status: %s\n", result.Status)
+fmt.Printf("Nombre: %s\n", result.Nombre)
+fmt.Printf("Total a Pagar: $%s\n", result.TotalPagar)
+fmt.Printf("Validación de Fecha: %s\n", result.Validaciones.Fecha)
 ```
+
+**Response Fields:**
+
+The `ComprobanteDomicilioResponse` struct contains:
+
+- Basic Info: `QR`, `Tipo`, `Status`, `ClaveMensaje`
+- Personal: `Nombre`, `Calle`, `Colonia`, `Ciudad`, `CP`
+- Service: `NumeroServicio`, `NumeroMedidor`, `Tarifa`, `Referencia`
+- Billing: `TotalPagar`, `TotalPagar2`, `Fecha`, `FechaLimitePago`, `PeriodoFacturado`
+- Codes: `CodigoBarras`, `CodigoNumerico`, `CodigoValidacion`, `RMU2`, `Multiplicador`
+- Validaciones: Nested object with validation results for `CodigoNumerico`, `Fecha`, `NumeroServicio`, `Tarifa`, `TotalPagar`
 
 ## Adding New Endpoints
 

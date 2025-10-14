@@ -148,10 +148,57 @@ type ComprobanteDomicilioRequest struct {
 	Comprobante string `json:"comprobante"` // Base64 encoded image
 }
 
+// ComprobanteDomicilioValidaciones represents the validation results in the comprobante_domicilio response
+type ComprobanteDomicilioValidaciones struct {
+	CodigoNumerico string `json:"codigoNumerico"`
+	Fecha          string `json:"fecha"`
+	NumeroServicio string `json:"numeroServicio"`
+	Tarifa         string `json:"tarifa"`
+	TotalPagar     string `json:"totalPagar"`
+}
+
+// ComprobanteDomicilioResponse represents the response from the comprobante_domicilio endpoint
+type ComprobanteDomicilioResponse struct {
+	QR               string                           `json:"QR"`
+	Calle            string                           `json:"calle"`
+	Ciudad           string                           `json:"ciudad"`
+	ClaveMensaje     string                           `json:"claveMensaje"`
+	CodigoBarras     string                           `json:"codigoBarras"`
+	CodigoNumerico   string                           `json:"codigoNumerico"`
+	CodigoValidacion string                           `json:"codigoValidacion"`
+	Colonia          string                           `json:"colonia"`
+	CP               string                           `json:"cp"`
+	Fecha            string                           `json:"fecha"`
+	FechaLimitePago  string                           `json:"fechaLimitePago"`
+	Multiplicador    string                           `json:"multiplicador"`
+	Nombre           string                           `json:"nombre"`
+	NumeroMedidor    string                           `json:"numeroMedidor"`
+	NumeroServicio   string                           `json:"numeroServicio"`
+	PeriodoFacturado string                           `json:"periodoFacturado"`
+	Referencia       string                           `json:"referencia"`
+	RMU2             string                           `json:"rmu2"`
+	Status           string                           `json:"status"`
+	Tarifa           string                           `json:"tarifa"`
+	Tipo             string                           `json:"tipo"`
+	TotalPagar       string                           `json:"totalPagar"`
+	TotalPagar2      string                           `json:"totalPagar2"`
+	Validaciones     ComprobanteDomicilioValidaciones `json:"validaciones"`
+}
+
 // SendComprobanteDomicilio is a convenience method for sending a comprobante_domicilio request
-func (c *Client) SendComprobanteDomicilio(base64Image string) (*Response, error) {
+// It automatically parses the response into a ComprobanteDomicilioResponse struct
+func (c *Client) SendComprobanteDomicilio(base64Image string) (*ComprobanteDomicilioResponse, error) {
 	payload := ComprobanteDomicilioRequest{
 		Comprobante: base64Image,
 	}
-	return c.SendRequestWithPayload(EndpointComprobanteDomicilio, payload)
+	response, err := c.SendRequestWithPayload(EndpointComprobanteDomicilio, payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var result ComprobanteDomicilioResponse
+	if err := response.ParseResponse(&result); err != nil {
+		return nil, fmt.Errorf("error parsing response: %w", err)
+	}
+	return &result, nil
 }

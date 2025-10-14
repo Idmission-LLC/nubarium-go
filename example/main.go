@@ -67,22 +67,36 @@ func main() {
 		nubarium.WithCredentials(username, password),
 	)
 
-	// Send request using the convenience method
-	response, err := client.SendComprobanteDomicilio(base64Image)
+	// Send request using the convenience method - response is automatically parsed
+	result, err := client.SendComprobanteDomicilio(base64Image)
 	if err != nil {
 		log.Fatalf("Error sending request: %v", err)
 	}
 
 	// Display results
-	fmt.Printf("Status Code: %d\n", response.StatusCode)
-	fmt.Println("\nJSON Response:")
+	fmt.Println("=== Comprobante Domicilio OCR Results ===")
+	fmt.Printf("\nStatus: %s\n", result.Status)
+	fmt.Printf("Tipo: %s\n", result.Tipo)
+	fmt.Printf("Nombre: %s\n", result.Nombre)
+	fmt.Printf("Número de Servicio: %s\n", result.NumeroServicio)
+	fmt.Printf("Total a Pagar: $%s\n", result.TotalPagar)
+	fmt.Printf("Fecha Límite de Pago: %s\n", result.FechaLimitePago)
 
-	// Pretty print the JSON response
-	var prettyJSON interface{}
-	if err := json.Unmarshal([]byte(response.JSONData), &prettyJSON); err == nil {
-		prettyBytes, _ := json.MarshalIndent(prettyJSON, "", "  ")
-		fmt.Println(string(prettyBytes))
-	} else {
-		fmt.Println(response.JSONData)
-	}
+	fmt.Printf("\nDirección:\n")
+	fmt.Printf("  Calle: %s\n", result.Calle)
+	fmt.Printf("  Colonia: %s\n", result.Colonia)
+	fmt.Printf("  Ciudad: %s\n", result.Ciudad)
+	fmt.Printf("  CP: %s\n", result.CP)
+
+	fmt.Printf("\nValidaciones:\n")
+	fmt.Printf("  Código Numérico: %s\n", result.Validaciones.CodigoNumerico)
+	fmt.Printf("  Fecha: %s\n", result.Validaciones.Fecha)
+	fmt.Printf("  Número Servicio: %s\n", result.Validaciones.NumeroServicio)
+	fmt.Printf("  Tarifa: %s\n", result.Validaciones.Tarifa)
+	fmt.Printf("  Total a Pagar: %s\n", result.Validaciones.TotalPagar)
+
+	// Pretty print the full JSON
+	fmt.Println("\n=== Full JSON Response ===")
+	prettyBytes, _ := json.MarshalIndent(result, "", "  ")
+	fmt.Println(string(prettyBytes))
 }
