@@ -1,0 +1,136 @@
+package nubarium
+
+import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
+)
+
+// Client represents a Nubarium API client
+type Client struct {
+	BaseURL         string
+	Username        string
+	Password        string
+	RetryableClient *retryablehttp.Client
+}
+
+// ClientOption is a function that configures a Client
+type ClientOption func(*Client)
+
+// WithBaseURL sets the base URL for the Nubarium API
+func WithBaseURL(baseURL string) ClientOption {
+	return func(c *Client) {
+		c.BaseURL = baseURL
+	}
+}
+
+// WithCredentials sets the username and password for Basic Auth
+func WithCredentials(username, password string) ClientOption {
+	return func(c *Client) {
+		c.Username = username
+		c.Password = password
+	}
+}
+
+// WithRetryableClient allows injecting a custom retryable HTTP client
+func WithRetryableClient(client *retryablehttp.Client) ClientOption {
+	return func(c *Client) {
+		c.RetryableClient = client
+	}
+}
+
+// NewClient creates a new Nubarium client with the provided options
+func NewClient(opts ...ClientOption) *Client {
+	// Create default retryable client
+	retryClient := retryablehttp.NewClient()
+	retryClient.RetryMax = 3
+	retryClient.Logger = nil // Disable default logging
+
+	client := &Client{
+		RetryableClient: retryClient,
+	}
+
+	// Apply all options
+	for _, opt := range opts {
+		opt(client)
+	}
+
+	return client
+}
+
+// Response represents the response from Nubarium
+type Response struct {
+	JSONData   string
+	StatusCode int
+	Headers    http.Header
+}
+
+// SendRequest sends a JSON request to Nubarium API with automatic retries
+func (c *Client) SendRequest(jsonRequest string) (*Response, error) {
+	// Step 1: Prepare retryable HTTP request
+	req, err := retryablehttp.NewRequest(http.MethodPost, c.BaseURL, bytes.NewBufferString(jsonRequest))
+	if err != nil {
+		return nil, fmt.Errorf("error creating HTTP request: %w", err)
+	}
+
+	// Step 2: Set headers
+	req.Header.Set("Content-Type", "application/json")
+
+	// Add Basic Auth if credentials are provided
+	if c.Username != "" && c.Password != "" {
+		auth := c.Username + ":" + c.Password
+		encodedAuth := base64.StdEncoding.EncodeToString([]byte(auth))
+		req.Header.Set("Authorization", "Basic "+encodedAuth)
+	}
+
+	// Step 3: Send request with automatic retries
+	resp, err := c.RetryableClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error sending request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Step 4: Read response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+
+	jsonResponse := string(body)
+
+	// Check if response is actually JSON by trying to validate it
+	// If it's not JSON (e.g., error page, HTML), return error
+	var testJSON interface{}
+	if err := json.Unmarshal(body, &testJSON); err != nil {
+		return &Response{
+			JSONData:   jsonResponse,
+			StatusCode: resp.StatusCode,
+			Headers:    resp.Header,
+		}, fmt.Errorf("API returned non-JSON response (status %d): %s", resp.StatusCode, jsonResponse)
+	}
+
+	return &Response{
+		JSONData:   jsonResponse,
+		StatusCode: resp.StatusCode,
+		Headers:    resp.Header,
+	}, nil
+}
+
+// SendRequestWithPayload sends a request with a struct payload that will be marshaled to JSON
+func (c *Client) SendRequestWithPayload(payload interface{}) (*Response, error) {
+	jsonBytes, err := json.Marshal(payload)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling payload to JSON: %w", err)
+	}
+	return c.SendRequest(string(jsonBytes))
+}
+
+// ParseResponse unmarshals the JSON response into the provided struct
+func (r *Response) ParseResponse(v interface{}) error {
+	return json.Unmarshal([]byte(r.JSONData), v)
+}
