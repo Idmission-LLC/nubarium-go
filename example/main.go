@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -68,7 +69,7 @@ func main() {
 	)
 
 	// Send request using the convenience method - response is automatically parsed
-	result, err := client.SendComprobanteDomicilio(base64Image)
+	result, err := client.SendComprobanteDomicilio(context.Background(), base64Image)
 	if err != nil {
 		log.Fatalf("Error sending request: %v", err)
 	}

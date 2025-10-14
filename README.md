@@ -192,7 +192,7 @@ func WithRetryableClient(client *retryablehttp.Client) ClientOption
 ### SendRequest
 
 ```go
-func (c *Client) SendRequest(endpoint string, jsonRequest string) (*Response, error)
+func (c *Client) SendRequest(ctx context.Context, endpoint string, jsonRequest string) (*Response, error)
 ```
 
 Sends a JSON string request to a specific Nubarium API endpoint and returns the response.
@@ -200,7 +200,7 @@ Sends a JSON string request to a specific Nubarium API endpoint and returns the 
 ### SendRequestWithPayload
 
 ```go
-func (c *Client) SendRequestWithPayload(endpoint string, payload interface{}) (*Response, error)
+func (c *Client) SendRequestWithPayload(ctx context.Context, endpoint string, payload interface{}) (*Response, error)
 ```
 
 Marshals a Go struct to JSON and sends it to a specific Nubarium API endpoint.
@@ -208,7 +208,7 @@ Marshals a Go struct to JSON and sends it to a specific Nubarium API endpoint.
 ### SendComprobanteDomicilio
 
 ```go
-func (c *Client) SendComprobanteDomicilio(base64Image string) (*ComprobanteDomicilioResponse, error)
+func (c *Client) SendComprobanteDomicilio(ctx context.Context, base64Image string) (*ComprobanteDomicilioResponse, error)
 ```
 
 Convenience method for sending a comprobante_domicilio OCR request. Takes a base64-encoded image string and returns the parsed response automatically.
@@ -240,7 +240,7 @@ The package currently supports the following endpoints:
 
 **Endpoint constant:** `nubarium.EndpointComprobanteDomicilio`
 
-**Convenience method:** `client.SendComprobanteDomicilio(base64Image string) (*ComprobanteDomicilioResponse, error)`
+**Convenience method:** `client.SendComprobanteDomicilio(ctx context.Context, base64Image string) (*ComprobanteDomicilioResponse, error)`
 
 **Response struct:** `ComprobanteDomicilioResponse`
 
@@ -253,7 +253,7 @@ client := nubarium.NewClient(
 )
 
 base64Image := "your-base64-encoded-image"
-result, err := client.SendComprobanteDomicilio(base64Image)
+result, err := client.SendComprobanteDomicilio(context.Background(), base64Image)
 if err != nil {
     log.Fatalf("Error: %v", err)
 }
@@ -301,12 +301,12 @@ type NewEndpointRequest struct {
 3. **(Optional) Create a convenience method**:
 
 ```go
-func (c *Client) SendNewEndpoint(field1, field2 string) (*Response, error) {
+func (c *Client) SendNewEndpoint(ctx context.Context, field1, field2 string) (*Response, error) {
     payload := NewEndpointRequest{
         Field1: field1,
         Field2: field2,
     }
-    return c.SendRequestWithPayload(EndpointNewEndpoint, payload)
+    return c.SendRequestWithPayload(ctx, EndpointNewEndpoint, payload)
 }
 ```
 
@@ -314,11 +314,11 @@ func (c *Client) SendNewEndpoint(field1, field2 string) (*Response, error) {
 
 ```go
 // Using convenience method (if created)
-response, err := client.SendNewEndpoint("value1", "value2")
+response, err := client.SendNewEndpoint(ctx, "value1", "value2")
 
 // Or using generic method
 payload := NewEndpointRequest{Field1: "value1", Field2: "value2"}
-response, err := client.SendRequestWithPayload(EndpointNewEndpoint, payload)
+response, err := client.SendRequestWithPayload(ctx, EndpointNewEndpoint, payload)
 ```
 
 ## Dependencies

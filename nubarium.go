@@ -2,6 +2,7 @@ package nubarium
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -71,7 +72,7 @@ type Response struct {
 }
 
 // SendRequest sends a JSON request to a specific Nubarium API endpoint with automatic retries
-func (c *Client) SendRequest(endpoint string, jsonRequest string) (*Response, error) {
+func (c *Client) SendRequest(ctx context.Context, endpoint string, jsonRequest string) (*Response, error) {
 	// Construct full URL
 	fullURL := c.BaseURL + endpoint
 
@@ -92,7 +93,7 @@ func (c *Client) SendRequest(endpoint string, jsonRequest string) (*Response, er
 	}
 
 	// Step 3: Send request with automatic retries
-	resp, err := c.RetryableClient.Do(req)
+	resp, err := c.RetryableClient.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("error sending request: %w", err)
 	}
@@ -125,12 +126,12 @@ func (c *Client) SendRequest(endpoint string, jsonRequest string) (*Response, er
 }
 
 // SendRequestWithPayload sends a request with a struct payload that will be marshaled to JSON
-func (c *Client) SendRequestWithPayload(endpoint string, payload interface{}) (*Response, error) {
+func (c *Client) SendRequestWithPayload(ctx context.Context, endpoint string, payload interface{}) (*Response, error) {
 	jsonBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling payload to JSON: %w", err)
 	}
-	return c.SendRequest(endpoint, string(jsonBytes))
+	return c.SendRequest(ctx, endpoint, string(jsonBytes))
 }
 
 // ParseResponse unmarshals the JSON response into the provided struct
@@ -187,11 +188,11 @@ type ComprobanteDomicilioResponse struct {
 
 // SendComprobanteDomicilio is a convenience method for sending a comprobante_domicilio request
 // It automatically parses the response into a ComprobanteDomicilioResponse struct
-func (c *Client) SendComprobanteDomicilio(base64Image string) (*ComprobanteDomicilioResponse, error) {
+func (c *Client) SendComprobanteDomicilio(ctx context.Context, base64Image string) (*ComprobanteDomicilioResponse, error) {
 	payload := ComprobanteDomicilioRequest{
 		Comprobante: base64Image,
 	}
-	response, err := c.SendRequestWithPayload(EndpointComprobanteDomicilio, payload)
+	response, err := c.SendRequestWithPayload(ctx, EndpointComprobanteDomicilio, payload)
 	if err != nil {
 		return nil, err
 	}
