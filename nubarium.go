@@ -189,13 +189,13 @@ type ComprobanteDomicilioResponse struct {
 	TotalPagar2      string                           `json:"totalPagar2"`
 	Validaciones     ComprobanteDomicilioValidaciones `json:"validaciones"`
 
-	ParsedDate time.Time
-	DateError  error
+	ParsedDate time.Time `json:"parsedDate"`
+	DateError  error     `json:"dateError"`
 }
 
 // SendComprobanteDomicilio is a convenience method for sending a comprobante_domicilio request
 // It automatically parses the response into a ComprobanteDomicilioResponse struct
-func (c *Client) SendComprobanteDomicilio(ctx context.Context, base64Image string) (*ComprobanteDomicilioResponse, error) {
+func (c *Client) SendComprobanteDomicilio(ctx context.Context, base64Image string) (result *ComprobanteDomicilioResponse, err error) {
 	payload := ComprobanteDomicilioRequest{
 		Comprobante: base64Image,
 	}
@@ -204,12 +204,12 @@ func (c *Client) SendComprobanteDomicilio(ctx context.Context, base64Image strin
 		return nil, err
 	}
 
-	result := &ComprobanteDomicilioResponse{}
+	result = &ComprobanteDomicilioResponse{}
 	if err := response.ParseResponse(result); err != nil {
 		return nil, fmt.Errorf("error parsing response: %w", err)
 	}
 
-	result.ParsedDate, result.DateError = c.dateParser.Parse(result.Fecha)
+	// result.ParsedDate, result.DateError = c.dateParser.Parse(result.Fecha)
 
 	return result, nil
 }
