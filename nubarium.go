@@ -11,6 +11,7 @@ import (
 	"time"
 
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
+	dateparser "github.com/markusmobius/go-dateparser"
 )
 
 // Client represents a Nubarium API client
@@ -19,8 +20,6 @@ type Client struct {
 	Username        string
 	Password        string
 	RetryableClient *retryablehttp.Client
-
-	dateParser *DateParser
 }
 
 // ClientOption is a function that configures a Client
@@ -55,10 +54,7 @@ func NewClient(opts ...ClientOption) *Client {
 	retryClient.RetryMax = 3
 	retryClient.Logger = nil // Disable default logging
 
-	client := &Client{
-		RetryableClient: retryClient,
-		dateParser:      NewDateParser(),
-	}
+	client := &Client{RetryableClient: retryClient}
 
 	// Apply all options
 	for _, opt := range opts {
@@ -209,7 +205,11 @@ func (c *Client) SendComprobanteDomicilio(ctx context.Context, base64Image strin
 		return nil, fmt.Errorf("error parsing response: %w", err)
 	}
 
-	// result.ParsedDate, result.DateError = c.dateParser.Parse(result.Fecha)
+	if dt, err := dateparser.Parse(nil, result.Fecha); err == nil {
+		result.ParsedDate = dt.Time
+	} else {
+		result.DateError = err
+	}
 
 	return result, nil
 }
