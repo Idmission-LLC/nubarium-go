@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
 )
@@ -18,6 +19,8 @@ type Client struct {
 	Username        string
 	Password        string
 	RetryableClient *retryablehttp.Client
+
+	dateParser *DateParser
 }
 
 // ClientOption is a function that configures a Client
@@ -54,6 +57,7 @@ func NewClient(opts ...ClientOption) *Client {
 
 	client := &Client{
 		RetryableClient: retryClient,
+		dateParser:      NewDateParser(),
 	}
 
 	// Apply all options
@@ -109,7 +113,7 @@ func (c *Client) SendRequest(ctx context.Context, endpoint string, jsonRequest s
 
 	// Check if response is actually JSON by trying to validate it
 	// If it's not JSON (e.g., error page, HTML), return error
-	var testJSON interface{}
+	var testJSON any
 	if err := json.Unmarshal(body, &testJSON); err != nil {
 		return &Response{
 			JSONData:   jsonResponse,
@@ -126,7 +130,7 @@ func (c *Client) SendRequest(ctx context.Context, endpoint string, jsonRequest s
 }
 
 // SendRequestWithPayload sends a request with a struct payload that will be marshaled to JSON
-func (c *Client) SendRequestWithPayload(ctx context.Context, endpoint string, payload interface{}) (*Response, error) {
+func (c *Client) SendRequestWithPayload(ctx context.Context, endpoint string, payload any) (*Response, error) {
 	jsonBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling payload to JSON: %w", err)
@@ -135,7 +139,7 @@ func (c *Client) SendRequestWithPayload(ctx context.Context, endpoint string, pa
 }
 
 // ParseResponse unmarshals the JSON response into the provided struct
-func (r *Response) ParseResponse(v interface{}) error {
+func (r *Response) ParseResponse(v any) error {
 	return json.Unmarshal([]byte(r.JSONData), v)
 }
 
@@ -184,6 +188,9 @@ type ComprobanteDomicilioResponse struct {
 	TotalPagar       string                           `json:"totalPagar"`
 	TotalPagar2      string                           `json:"totalPagar2"`
 	Validaciones     ComprobanteDomicilioValidaciones `json:"validaciones"`
+
+	ParsedDate time.Time
+	DateError  error
 }
 
 // SendComprobanteDomicilio is a convenience method for sending a comprobante_domicilio request
@@ -197,9 +204,12 @@ func (c *Client) SendComprobanteDomicilio(ctx context.Context, base64Image strin
 		return nil, err
 	}
 
-	var result ComprobanteDomicilioResponse
-	if err := response.ParseResponse(&result); err != nil {
+	result := &ComprobanteDomicilioResponse{}
+	if err := response.ParseResponse(result); err != nil {
 		return nil, fmt.Errorf("error parsing response: %w", err)
 	}
-	return &result, nil
+
+	result.ParsedDate, result.DateError = c.dateParser.Parse(result.Fecha)
+
+	return result, nil
 }
