@@ -53,6 +53,10 @@ func NewClient(opts ...ClientOption) *Client {
 	retryClient := retryablehttp.NewClient()
 	retryClient.RetryMax = 3
 	retryClient.Logger = nil // Disable default logging
+	retryClient.HTTPClient = &http.Client{
+		Transport: http.DefaultTransport.(*http.Transport).Clone(),
+		Timeout:   5 * time.Minute, // Nubarium API timeout
+	}
 
 	client := &Client{RetryableClient: retryClient}
 
