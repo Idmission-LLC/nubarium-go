@@ -150,7 +150,7 @@ const (
 
 // ComprobanteDomicilioRequest represents the request payload for the comprobante_domicilio endpoint
 type ComprobanteDomicilioRequest struct {
-	Comprobante string `json:"comprobante"` // Base64 encoded image
+	Comprobante string `json:"comprobante"` // URL or base64-encoded document
 }
 
 // ComprobanteDomicilioValidaciones represents the validation results in the comprobante_domicilio response
@@ -195,9 +195,10 @@ type ComprobanteDomicilioResponse struct {
 
 // SendComprobanteDomicilio is a convenience method for sending a comprobante_domicilio request
 // It automatically parses the response into a ComprobanteDomicilioResponse struct
-func (c *Client) SendComprobanteDomicilio(ctx context.Context, base64Image string) (result *ComprobanteDomicilioResponse, err error) {
+// The documentSource parameter can be either a URL or a base64-encoded document string
+func (c *Client) SendComprobanteDomicilio(ctx context.Context, documentSource string) (result *ComprobanteDomicilioResponse, err error) {
 	payload := ComprobanteDomicilioRequest{
-		Comprobante: base64Image,
+		Comprobante: documentSource,
 	}
 	response, err := c.SendRequestWithPayload(ctx, EndpointComprobanteDomicilio, payload)
 	if err != nil {

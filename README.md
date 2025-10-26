@@ -71,8 +71,8 @@ func main() {
     )
 
     // Option 1: Use endpoint-specific convenience method
-    base64Image := "your-base64-encoded-image-here"
-    response, err := client.SendComprobanteDomicilio(base64Image)
+    documentSource := "https://example.com/document.pdf" // or base64-encoded document
+    response, err := client.SendComprobanteDomicilio(documentSource)
     if err != nil {
         log.Fatalf("Error: %v", err)
     }
@@ -208,10 +208,10 @@ Marshals a Go struct to JSON and sends it to a specific Nubarium API endpoint.
 ### SendComprobanteDomicilio
 
 ```go
-func (c *Client) SendComprobanteDomicilio(ctx context.Context, base64Image string) (*ComprobanteDomicilioResponse, error)
+func (c *Client) SendComprobanteDomicilio(ctx context.Context, documentSource string) (*ComprobanteDomicilioResponse, error)
 ```
 
-Convenience method for sending a comprobante_domicilio OCR request. Takes a base64-encoded image string and returns the parsed response automatically.
+Convenience method for sending a comprobante_domicilio OCR request. The `documentSource` parameter accepts either a URL or a base64-encoded document string. Returns the parsed response automatically.
 
 ### Response
 
@@ -240,7 +240,7 @@ The package currently supports the following endpoints:
 
 **Endpoint constant:** `nubarium.EndpointComprobanteDomicilio`
 
-**Convenience method:** `client.SendComprobanteDomicilio(ctx context.Context, base64Image string) (*ComprobanteDomicilioResponse, error)`
+**Convenience method:** `client.SendComprobanteDomicilio(ctx context.Context, documentSource string) (*ComprobanteDomicilioResponse, error)`
 
 **Response struct:** `ComprobanteDomicilioResponse`
 
@@ -252,8 +252,13 @@ client := nubarium.NewClient(
     nubarium.WithCredentials("username", "password"),
 )
 
-base64Image := "your-base64-encoded-image"
-result, err := client.SendComprobanteDomicilio(context.Background(), base64Image)
+// Option 1: Using a URL
+documentSource := "https://example.com/comprobante.pdf"
+result, err := client.SendComprobanteDomicilio(context.Background(), documentSource)
+
+// Option 2: Using base64-encoded document
+// base64Document := "your-base64-encoded-document"
+// result, err := client.SendComprobanteDomicilio(context.Background(), base64Document)
 if err != nil {
     log.Fatalf("Error: %v", err)
 }

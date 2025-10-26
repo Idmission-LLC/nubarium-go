@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	nubarium "github.com/Idmission-LLC/nubarium-go"
 	"github.com/spf13/viper"
@@ -32,10 +33,10 @@ func init() {
 func main() {
 	// Check for command line argument
 	if len(os.Args) < 2 {
-		log.Fatal("Usage: go run main.go <image_file_path>")
+		log.Fatal("Usage: go run main.go <image_file_path_or_url>")
 	}
 
-	imagePath := os.Args[1]
+	inputArg := os.Args[1]
 
 	// Load configuration from .env file or environment variables
 	endpoint := viper.GetString("NUBARIUM_ENDPOINT")
@@ -53,14 +54,22 @@ func main() {
 		log.Fatal("NUBARIUM_PASSWORD is required")
 	}
 
-	// Read the image file
-	imageData, err := os.ReadFile(imagePath)
-	if err != nil {
-		log.Fatalf("Error reading image file: %v", err)
-	}
+	var documentSource string
 
-	// Convert image to base64
-	base64Image := base64.StdEncoding.EncodeToString(imageData)
+	// Check if the input is a URL or a local file path
+	if strings.HasPrefix(inputArg, "https://") || strings.HasPrefix(inputArg, "http://") {
+		// If it's a URL, use it directly
+		documentSource = inputArg
+		fmt.Printf("Using URL: %s\n\n", inputArg)
+	} else {
+		// If it's a file path, read and encode as base64
+		imageData, err := os.ReadFile(inputArg)
+		if err != nil {
+			log.Fatalf("Error reading image file: %v", err)
+		}
+		documentSource = base64.StdEncoding.EncodeToString(imageData)
+		fmt.Printf("Using local file (base64 encoded): %s\n\n", inputArg)
+	}
 
 	// Initialize the Nubarium client
 	client := nubarium.NewClient(
@@ -69,7 +78,8 @@ func main() {
 	)
 
 	// Send request using the convenience method - response is automatically parsed
-	result, err := client.SendComprobanteDomicilio(context.Background(), base64Image)
+	// The documentSource can be either a URL or base64-encoded document
+	result, err := client.SendComprobanteDomicilio(context.Background(), documentSource)
 	if err != nil {
 		log.Fatalf("Error sending request: %v", err)
 	}
