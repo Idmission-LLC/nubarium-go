@@ -281,6 +281,23 @@ The `ComprobanteDomicilioResponse` struct contains:
 - Codes: `CodigoBarras`, `CodigoNumerico`, `CodigoValidacion`, `RMU2`, `Multiplicador`
 - Validaciones: Nested object with validation results for `CodigoNumerico`, `Fecha`, `NumeroServicio`, `Tarifa`, `TotalPagar`
 
+## Testing with Real-world Fixtures
+
+- Place example Nubarium API responses in `testdata/responses/*.json`.
+- A test (`nubarium_test.go`) will attempt to parse every JSON file into `ComprobanteDomicilioResponse`.
+
+### Anonymizing Fixtures
+
+These fixtures may contain sensitive data. Use the included sanitizer command to anonymize them before committing:
+
+```bash
+go run ./cmd/sanitize-fixtures -- ./testdata/responses
+```
+
+If you omit the path, it defaults to `testdata/responses`.
+
+The sanitizer preserves schema and replaces PII-like fields (e.g., `nombre`, `calle`, `numeroServicio`, codes, etc.), normalizes amounts, and sets dates to safe values while keeping them realistic.
+
 ## Adding New Endpoints
 
 To add support for a new Nubarium endpoint:

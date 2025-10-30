@@ -1,0 +1,20 @@
+{
+  "calle": "CALLE FALSA 123",
+  "ciudad": "CIUDAD ANON",
+  "claveMensaje": "ANON",
+  "codigoBarras": "ANON",
+  "codigoNumerico": "ANON",
+  "codigoValidacion": "ANON",
+  "colonia": "COLONIA FALSA",
+  "cp": "00000",
+  "cuenta": "+520000000000",
+  "nombre": "ANON USER",
+  "status": "OK",
+  "telefono": "+520000000000",
+  "tipo": "ANON",
+  "totalPagar": "100.00",
+  "validaciones": {
+    "codigoNumerico": "ANON",
+    "cuenta": "OK"
+  }
+}

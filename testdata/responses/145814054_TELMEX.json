@@ -1,0 +1,22 @@
+{
+  "calle": "CALLE FALSA 123",
+  "ciudad": "CIUDAD ANON",
+  "claveMensaje": "ANON",
+  "codigoValidacion": "ANON",
+  "colonia": "COLONIA FALSA",
+  "cp": "00000",
+  "fecha": "2024-12-06",
+  "fechaLimitePago": "2024-04-22",
+  "mesFacturacion": "Agosto",
+  "mesFacturacion2": "Agosto",
+  "nombre": "ANON USER",
+  "numeroFactura": "+520000000000",
+  "pagarAntesDe": "13-SEP-2025",
+  "referencia": "ANON-beabbd51",
+  "status": "OK",
+  "telefono": "+520000000000",
+  "tipo": "ANON",
+  "totalPagar": "100.00",
+  "totalPagar2": "100.00",
+  "validaciones": {}
+}

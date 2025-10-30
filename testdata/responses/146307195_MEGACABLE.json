@@ -1,0 +1,21 @@
+{
+  "cargosPeriodo": "$805.00",
+  "ciudad": "CIUDAD ANON",
+  "claveMensaje": "ANON",
+  "codigoNumerico": "ANON",
+  "codigoValidacion": "ANON",
+  "colonia": "COLONIA FALSA",
+  "cp": "00000",
+  "fecha": "2025-01-14",
+  "fechaLimitePago": "2025-05-08",
+  "mensualidad": "Agosto 2025",
+  "nombre": "ANON USER",
+  "status": "OK",
+  "suscriptor": "+520000000000",
+  "telefono": "+520000000000",
+  "tipo": "ANON",
+  "validaciones": {
+    "fecha": "2024-09-07",
+    "suscriptor": "REVISAR"
+  }
+}

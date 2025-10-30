@@ -1,0 +1,23 @@
+{
+  "QR": "QR-ANON-06c70167",
+  "calle": "CALLE FALSA 123",
+  "cargosMes": "$3.00",
+  "ciudad": "CIUDAD ANON",
+  "claveMensaje": "ANON",
+  "codigoBarras": "ANON",
+  "codigoValidacion": "ANON",
+  "colonia": "COLONIA FALSA",
+  "cp": "00000",
+  "cuenta": "XXXXXXXX",
+  "fecha": "2025-03-09",
+  "fechaLimitePago": "2023-12-01",
+  "mesFacturacion": "SEPTIEMBRE 2025",
+  "mesFacturacion2": "SEPTIEMBRE 2025",
+  "nombre": "ANON USER",
+  "referencia": "ANON-06c70167",
+  "saldoAnterior": "$838.00",
+  "status": "OK",
+  "telefono": "+520000000000",
+  "tipo": "ANON",
+  "totalPagar": "100.00"
+}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -155,11 +156,11 @@ type ComprobanteDomicilioRequest struct {
 
 // ComprobanteDomicilioValidaciones represents the validation results in the comprobante_domicilio response
 type ComprobanteDomicilioValidaciones struct {
-	CodigoNumerico string `json:"codigoNumerico"`
-	Fecha          string `json:"fecha"`
-	NumeroServicio string `json:"numeroServicio"`
-	Tarifa         string `json:"tarifa"`
-	TotalPagar     string `json:"totalPagar"`
+	CodigoNumerico string         `json:"codigoNumerico"`
+	Fecha          string         `json:"fecha"`
+	NumeroServicio string         `json:"numeroServicio"`
+	Tarifa         string         `json:"tarifa"`
+	TotalPagar     StringOrObject `json:"totalPagar"`
 }
 
 // ComprobanteDomicilioResponse represents the response from the comprobante_domicilio endpoint
@@ -185,12 +186,70 @@ type ComprobanteDomicilioResponse struct {
 	Status           string                           `json:"status"`
 	Tarifa           string                           `json:"tarifa"`
 	Tipo             string                           `json:"tipo"`
-	TotalPagar       string                           `json:"totalPagar"`
-	TotalPagar2      string                           `json:"totalPagar2"`
+	TotalPagar       StringOrObject                   `json:"totalPagar"`
+	TotalPagar2      StringOrObject                   `json:"totalPagar2"`
 	Validaciones     ComprobanteDomicilioValidaciones `json:"validaciones"`
 
 	ParsedDate time.Time `json:"parsedDate"`
 	DateError  error     `json:"dateError"`
+}
+
+// StringOrObject unmarshals JSON values that may be a string or an object.
+// The raw JSON is preserved; helpers are provided to access common forms.
+type StringOrObject struct {
+	raw json.RawMessage
+}
+
+// UnmarshalJSON implements json.Unmarshaler to accept string or object.
+func (so *StringOrObject) UnmarshalJSON(data []byte) error {
+	if so == nil {
+		return errors.New("StringOrObject: nil receiver")
+	}
+	if data == nil {
+		so.raw = nil
+		return nil
+	}
+	so.raw = append(so.raw[:0], data...)
+	return nil
+}
+
+// MarshalJSON returns the raw JSON unchanged to preserve original shape.
+func (so StringOrObject) MarshalJSON() ([]byte, error) {
+	if so.raw == nil {
+		return []byte("null"), nil
+	}
+	return so.raw, nil
+}
+
+// IsString reports whether the underlying JSON value is a string.
+func (so StringOrObject) IsString() bool {
+	return len(so.raw) >= 2 && so.raw[0] == '"' && so.raw[len(so.raw)-1] == '"'
+}
+
+// String returns the string value if it is a string; otherwise a compact JSON representation of the object.
+func (so StringOrObject) String() string {
+	if so.IsString() {
+		var s string
+		if err := json.Unmarshal(so.raw, &s); err == nil {
+			return s
+		}
+	}
+	var out any
+	if err := json.Unmarshal(so.raw, &out); err == nil {
+		b, err := json.Marshal(out)
+		if err == nil {
+			return string(b)
+		}
+	}
+	return string(so.raw)
+}
+
+// UnmarshalObject unmarshals the underlying value into dst if it is an object.
+func (so StringOrObject) UnmarshalObject(dst any) error {
+	if so.IsString() {
+		return fmt.Errorf("value is string, not object")
+	}
+	return json.Unmarshal(so.raw, dst)
 }
 
 // SendComprobanteDomicilio is a convenience method for sending a comprobante_domicilio request

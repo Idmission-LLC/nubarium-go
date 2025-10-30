@@ -1,0 +1,32 @@
+{
+  "calle": "CALLE FALSA 123",
+  "ciudad": "CIUDAD ANON",
+  "claveMensaje": "ANON",
+  "codigoBarras": "ANON",
+  "codigoNumerico": "ANON",
+  "codigoValidacion": "ANON",
+  "colonia": "COLONIA FALSA",
+  "cp": "00000",
+  "cuenta": "+520000000000",
+  "fecha": "2024-11-18",
+  "fechaLimitePago": "2025-05-08",
+  "nombre": "ANON USER",
+  "nombreEmpresa": "Jonathan Ary",
+  "status": "OK",
+  "telefono": "+520000000000",
+  "tipo": "ANON",
+  "totalPagar": {
+    "precioLista": {
+      "monto": "$753.00",
+      "pagarAntesDe": "14.septiembre.2025"
+    },
+    "prontoPago": {
+      "monto": "$703.00",
+      "pagarAntesDe": "06.septiembre.2025"
+    }
+  },
+  "validaciones": {
+    "codigoNumerico": "ANON",
+    "cuenta": "OK"
+  }
+}

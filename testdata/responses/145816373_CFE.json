@@ -1,0 +1,33 @@
+{
+  "QR": "QR-ANON-a6146c4a",
+  "adeudoAnterior": "368.22",
+  "calle": "CALLE FALSA 123",
+  "ciudad": "CIUDAD ANON",
+  "claveMensaje": "ANON",
+  "codigoNumerico": "ANON",
+  "codigoValidacion": "ANON",
+  "colonia": "COLONIA FALSA",
+  "cp": "00000",
+  "fecha": "2024-04-08",
+  "fechaLimitePago": "2024-01-14",
+  "multiplicador": "ANON-a6146c4a",
+  "nombre": "ANON USER",
+  "numeroMedidor": "ANON",
+  "numeroServicio": "ANON",
+  "periodoFacturado": "2024-04-02",
+  "referencia": "ANON-a6146c4a",
+  "rmu": "3717918-10-09XAXX-010101010CFE",
+  "rmu2": "ANON-a6146c4a",
+  "status": "OK",
+  "tarifa": "T-ANON",
+  "tipo": "ANON",
+  "totalPagar": "100.00",
+  "totalPagar2": "100.00",
+  "validaciones": {
+    "fecha": "2024-03-30",
+    "numeroServicio": "ANON",
+    "rmu": "OK",
+    "tarifa": "T-ANON",
+    "totalPagar": "100.00"
+  }
+}

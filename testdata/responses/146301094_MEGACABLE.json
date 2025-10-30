@@ -1,0 +1,26 @@
+{
+  "calle": "CALLE FALSA 123",
+  "cargosPeriodo": "$400.00",
+  "ciudad": "CIUDAD ANON",
+  "claveMensaje": "ANON",
+  "codigoBarras": "ANON",
+  "codigoNumerico": "ANON",
+  "codigoValidacion": "ANON",
+  "colonia": "COLONIA FALSA",
+  "cp": "00000",
+  "fecha": "2025-06-03",
+  "fechaLimitePago": "2025-07-04",
+  "mensualidad": "Septiembre 2025",
+  "nombre": "ANON USER",
+  "status": "OK",
+  "suscriptor": "+520000000000",
+  "telefono": "+520000000000",
+  "tipo": "ANON",
+  "totalPagar": "100.00",
+  "validaciones": {
+    "codigoNumerico": "ANON",
+    "fecha": "2024-03-07",
+    "suscriptor": "OK",
+    "totalPagar": "100.00"
+  }
+}

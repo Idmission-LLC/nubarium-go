@@ -1,0 +1,31 @@
+{
+  "calle": "CALLE FALSA 123",
+  "ciudad": "CIUDAD ANON",
+  "claveMensaje": "ANON",
+  "codigoBarras": "ANON",
+  "codigoNumerico": "ANON",
+  "codigoValidacion": "ANON",
+  "colonia": "COLONIA FALSA",
+  "cp": "00000",
+  "cuenta": "+520000000000",
+  "fecha": "2024-03-17",
+  "fechaLimitePago": "2025-10-26",
+  "nombre": "ANON USER",
+  "status": "OK",
+  "telefono": "+520000000000",
+  "tipo": "ANON",
+  "totalPagar": {
+    "precioLista": {
+      "monto": "$730.00",
+      "pagarAntesDe": "15.junio.2025"
+    },
+    "prontoPago": {
+      "monto": "$680.00",
+      "pagarAntesDe": "11.junio.2025"
+    }
+  },
+  "validaciones": {
+    "codigoNumerico": "ANON",
+    "cuenta": "OK"
+  }
+}
